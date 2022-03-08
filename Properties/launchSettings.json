@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AIScriptCLA": {
+      "commandName": "Project",
+      "commandLineArgs": "--compile --path c:/Users/dareb/OneDrive/Desktop/Brawlmods/PPlusAi/Chars/captain/ai_captain/__preprocessed --out C:/Users/dareb/OneDrive/Desktop/Brawlmods/PPlusAi/Chars/captain/out/FitCaptainMotionEtc.pac --include c:/Users/dareb/OneDrive/Desktop/Brawlmods/PPlusAi/Include"
+    }
+  }
+}

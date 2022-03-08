@@ -3,18 +3,20 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using BrawlLib.SSBB.ResourceNodes;
+
 namespace AIScriptCLA
 {
+
     class Program
     {
         // taken directly from the AIScriptpad2.0.exe decompiled source
         private static T[] FindSomething<T>(ResourceNode node, ResourceType t) where T : ResourceNode
 		{
 			List<T> list = new List<T>();
-			IEnumerable<ResourceNode> enumerable = node.Children.Where((ResourceNode x) => x.ResourceType == ResourceType.AISet || x.ResourceType == ResourceType.ARC);
+			IEnumerable<ResourceNode> enumerable = node.Children.Where((ResourceNode x) => x.ResourceType == ResourceType.AISet || x.ResourceType == ResourceType.ARC || x.ResourceType == ResourceType.ARCEntry);
 			foreach (ResourceNode item in enumerable)
 			{
-				if (!item.Name.Contains("ai_"))
+				if (!item.Name.Contains("ai_") && !item.Name.Contains("Fighter"))
 				{
 					continue;
 				}
@@ -46,7 +48,7 @@ namespace AIScriptCLA
 		}
 
         static void Main(string[] args)
-        {            
+        {
             if (args.Contains("--export")) {
                 string path = "nop";
                 string outFolder = "nop";
@@ -89,6 +91,7 @@ namespace AIScriptCLA
                 string outFolder = "nop";
                 string includeFolder = "nop";
                 string toReplace = "nop";
+                bool isCommon = false;
 
                 int idx = Array.FindIndex(args, item => item == "--path");
                 if (idx != -1 && idx + 1 < args.Length) {
@@ -97,6 +100,9 @@ namespace AIScriptCLA
 
                 idx = Array.FindIndex(args, item => item == "--out");
                 if (idx != -1 && idx + 1 < args.Length) {
+                    if (args[idx + 1].Contains("Fighter")) {
+                        isCommon = true;
+                    }
                     outFolder = args[idx + 1];
                 }
 
@@ -113,21 +119,28 @@ namespace AIScriptCLA
                 Console.WriteLine(path);
                 Console.WriteLine(outFolder);
                 Console.WriteLine(includeFolder);
-                Console.WriteLine(toReplace);
+                // Console.WriteLine(toReplace);
                 if (path != "nop" && outFolder != "nop" && includeFolder != "nop") {
-                    if (toReplace == "nop") toReplace = (new DirectoryInfo(path)).Name;
+                    if (toReplace == "nop") toReplace = (new DirectoryInfo(path)).Parent.Name;
                     BrawlAICore.Options.IncludePath = includeFolder;
                     ResourceNode node = NodeFactory.FromFile(null, outFolder);
-		            ARCEntryNode[] array = FindSomething<ARCEntryNode>(node, ResourceType.AIPD);
+                    ARCEntryNode[] array;
+                    array = FindSomething<ARCEntryNode>(node, ResourceType.AIPD);
+
                     for (int i = 0; i < array.Length; i++) {
+                        // Console.WriteLine(array[i].Parent.Name);
+                        // Console.WriteLine(toReplace);
                         if (toReplace == array[i].Parent.Name) {
-                            Console.WriteLine("found [" + i + "]: " + toReplace);
+                            // Console.WriteLine("found [" + i + "]: " + toReplace);
                             node.Dispose();
-                            List<string> output = BrawlAICore.Compiler.Compile(
+
+                            List<string> output = BrawlAICore.CustomCompiler.Compile(
                                 path,
                                 outFolder,
-                                i
-                            );
+                                i,
+                                isCommon
+                            );          
+                            
                             output.ForEach((string str) => Console.WriteLine(str));
                             break;
                         }
